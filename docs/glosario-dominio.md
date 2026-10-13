@@ -71,9 +71,10 @@ Este documento define el **Lenguaje Ubicuo** (*Ubiquitous Language*) del proyect
 ### `MomentoIngesta`
 * **Definición:** Clasificación enumerada de las diferentes ingestas fisiológicas del día:
   - `DESAYUNO`
+  - `MEDIA_MANANA`
   - `ALMUERZO`
-  - `CENA`
   - `MERIENDA`
+  - `CENA`
 
 ### `DiaSemana`
 * **Definición:** Clasificación enumerada de los días naturales del ciclo semanal:
