@@ -2,159 +2,147 @@
 
 [![CI Build](https://github.com/JavierLianoRioz/recipe-meal-planning/actions/workflows/ci.yml/badge.svg)](https://github.com/JavierLianoRioz/recipe-meal-planning/actions)
 
-> **Asignatura:** Rapid Development of Java Applications Using Programming Frameworks  
-> **Institución:** Algebra Bernays University — Academic Year 2026/27  
-> **Estudiante:** Javier Liaño Rioz  
-> **Proyecto:** P20 — Recipe and Meal Planning  
+> **Course:** Rapid Development of Java Applications Using Programming Frameworks  
+> **Institution:** Algebra Bernays University — Academic Year 2026/27  
+> **Student:** Javier Liaño Rioz  
+> **Project:** P20 — Recipe and Meal Planning  
 
 ---
 
-## Índice
+## Table of Contents
 
-1. [Descripción General](#1-descripción-general)
-2. [Despliegue y Acceso Público](#2-despliegue-y-acceso-público)
-3. [Credenciales Demo por Rol](#3-credenciales-demo-por-rol)
-4. [Stack Tecnológico y Decisiones de Arquitectura](#4-stack-tecnológico-y-decisiones-de-arquitectura)
-5. [Instrucciones de Ejecución Local](#5-instrucciones-de-ejecución-local)
-   - [Requisitos Previos](#51-requisitos-previos)
-   - [Ejecución con Docker Compose](#52-ejecución-con-docker-compose)
-   - [Ejecución con Maven Wrapper](#53-ejecución-con-maven-wrapper)
-6. [Mapeo de Prototipo Figma a Vistas Thymeleaf](#6-mapeo-de-prototipo-figma-a-vistas-thymeleaf)
-7. [Integración de Inteligencia Artificial (LLM)](#7-integración-de-inteligencia-artificial-llm)
-8. [Limitaciones Actuales y Siguientes Pasos](#8-limitaciones-actuales-y-siguientes-pasos)
-
----
-
-## 1. Descripción General
-
-> [!NOTE] ¿Qué debe contener esta sección?
-> Explica de forma concisa qué problema resuelve la aplicación en el dominio culinario y de planificación nutricional.
-> - Detalla el modelo de agregados principal: `Recipe` $\rightarrow$ `RecipeIngredient` $\rightarrow$ `Ingredient` y `MealPlan` $\rightarrow$ `PlannedMeal` $\rightarrow$ `Recipe`.
-> - Menciona los tres requisitos avanzados específicos:
->   1. Escalado de raciones y conversión bidireccional masa/volumen.
->   2. Agregación nutricional acumulada en el plan semanal.
->   3. Generación y consolidación de la lista de la compra deduplicada.
-
-<!-- TODO: Rellenar la descripción del producto, el flujo de usuario y el valor diferencial. -->
+1. [General Description](#1-general-description)
+2. [Public Deployment and External Access](#2-public-deployment-and-external-access)
+3. [Demo Credentials by Role](#3-demo-credentials-by-role)
+4. [Technology Stack and Architectural Decisions](#4-technology-stack-and-architectural-decisions)
+5. [Local Setup and Execution Instructions](#5-local-setup-and-execution-instructions)
+   - [Prerequisites](#51-prerequisites)
+   - [Running with Docker Compose](#52-running-with-docker-compose)
+   - [Running with Maven Wrapper](#53-running-with-maven-wrapper)
+6. [Figma Prototype to Thymeleaf View Mapping](#6-figma-prototype-to-thymeleaf-view-mapping)
+7. [Artificial Intelligence Integration (LLM)](#7-artificial-intelligence-integration-llm)
+8. [Current Limitations and Engineering Roadmap](#8-current-limitations-and-engineering-roadmap)
 
 ---
 
-## 2. Despliegue y Acceso Público
+## 1. General Description
 
-> [!NOTE] ¿Qué debe contener esta sección?
-> Es obligatorio según la especificación del curso para la defensa final.
-> - **URL pública en producción:** Enlace HTTPS accesible por internet (ej. Render/Koyeb).
-> - **Base de datos gestionada:** Proveedor en la nube utilizado (ej. Neon PostgreSQL).
-> - **Comportamiento Cold-Start:** Advertencia honesta sobre el tiempo de arranque en frío si el contenedor gratuito entra en reposo (ej. ~50-60s tras 15 min de inactividad).
+The **Recipe and Meal Planning** platform is a full-stack, enterprise-grade Java web application designed to solve culinary formulation, recursive recipe composition, household meal planning, and automated grocery procurement.
 
-- **URL Pública:** `https://<tu-app-en-render>.onrender.com`
-- **Documentación OpenAPI (Swagger):** `https://<tu-app-en-render>.onrender.com/swagger-ui.html`
-- **Actuator Health:** `https://<tu-app-en-render>.onrender.com/actuator/health`
+### Core Aggregate Structure
+```text
+Recipe -> RecipeIngredient (amount, unit, canonicalGrams) -> RawIngredient | Recipe (sub-recipe)
+WeeklyPlan -> CalendarEntry (dayOfWeek, mealTime) -> Menu -> MenuCourse (servings) -> Recipe
+```
+
+### Advanced Specialized Capabilities
+1. **Dimension-Aware Recipe Scaling:** Dynamic scaling of ingredient quantities across arbitrary headcount targets with physical volume-to-mass conversions ($\rho$).
+2. **Nutritional Aggregation:** Real-time consolidated nutritional balance (calories, macronutrients) computed across complex multi-course meals and weekly schedules.
+3. **Consolidated Grocery List Generation:** Automated deduplication and unit normalization of ingredients across distinct recipes, applying discrete packaging ceilings.
+4. **AI-Powered Ingredient Normalizer:** Natural language extraction and mapping of unformatted grocery lines into canonical database ingredients.
 
 ---
 
-## 3. Credenciales Demo por Rol
+## 2. Public Deployment and External Access
 
-> [!NOTE] ¿Qué debe contener esta sección?
-> La especificación exige al menos 3 roles con capacidades operativas claramente diferenciadas (ej. `ROLE_ADMIN`, `ROLE_PLANNER`, `ROLE_VIEWER`).
-> Proporciona usuarios y contraseñas de demostración sembrados automáticamente por Flyway en la base de datos de producción para que el examinador pueda iniciar sesión.
+- **Public Production URL:** `https://<app-service>.onrender.com`
+- **OpenAPI Documentation (Swagger UI):** `https://<app-service>.onrender.com/swagger-ui.html`
+- **Spring Actuator Health Endpoint:** `https://<app-service>.onrender.com/actuator/health`
 
-| Rol | Usuario | Contraseña | Capacidades y Permisos |
+> **Note on Cold Starts:** On free-tier cloud containers (e.g., Render), instances spin down after 15 minutes of inactivity. Initial requests may experience a 50–60 second cold-start delay while the runtime and connection pool initialize.
+
+---
+
+## 3. Demo Credentials by Role
+
+The database is seeded on startup via Flyway migrations with demonstration accounts covering all security tiers:
+
+| Role | Username | Password | Operational Capabilities |
 | :--- | :--- | :--- | :--- |
-| `ROLE_ADMIN` | `admin` | *(definir contraseña demo)* | Gestión global de ingredientes del catálogo, auditoría y tareas programadas. |
-| `ROLE_PLANNER` | `planner` | *(definir contraseña demo)* | Creación de recetas, planificación semanal de comidas y normalización con IA. |
-| `ROLE_VIEWER` | `viewer` | *(definir contraseña demo)* | Solo lectura de recetas públicas y listas generadas. |
+| `ROLE_ADMIN` | `admin` | `Admin123!` | Global ingredient catalog administration, database auditing, and Quartz scheduled jobs management. |
+| `ROLE_PLANNER` | `planner` | `Planner123!` | Recipe authoring, sub-recipe nesting, weekly meal planning, and AI normalization tools. |
+| `ROLE_VIEWER` | `viewer` | `Viewer123!` | Read-only browsing of public recipes, nutrition facts, and generated grocery lists. |
 
 ---
 
-## 4. Stack Tecnológico y Decisiones de Arquitectura
+## 4. Technology Stack and Architectural Decisions
 
-> [!NOTE] ¿Qué debe contener esta sección?
-> Resume las decisiones tecnológicas y enlaza los Architecture Decision Records (ADRs) ubicados en `docs/adr/`.
-> - **Java 25** & **Spring Boot 4.1**.
-> - **Spring Security 7** (BCrypt, CSRF, `@PreAuthorize`).
-> - **Spring Data JPA** sobre **Hibernate 7** con PostgreSQL y Flyway.
-> - **Thymeleaf** con Layout Dialect y Security Dialect.
-> - **Springdoc OpenAPI 3.x** y RFC 7807 (`ProblemDetail`).
-> - Referencia a los 3 ADRs:
->   - `docs/adr/001-persistence-association-entity.md` (Por qué `RecipeIngredient` lleva atributos).
->   - `docs/adr/002-ai-structured-ingredient-normalizer.md` (Integración LLM / Jev / Spring AI).
->   - `docs/adr/003-deployment-render-neon.md` (Infraestructura y variables de entorno).
+- **Runtime & Core Framework:** Java 21 LTS / Spring Boot 4.1
+- **Security:** Spring Security 7 (BCrypt password hashing, CSRF protection, method-level `@PreAuthorize`)
+- **Persistence & ORM:** Spring Data JPA over Hibernate 7, PostgreSQL 16+, Flyway database migrations
+- **Presentation Layer:** Thymeleaf with Layout Dialect and Spring Security Dialect
+- **REST API:** Open standards compliant, Springdoc OpenAPI 3.x, RFC 7807 `ProblemDetail` error payload
+- **Quality Assurance:** JUnit 5/6, Mockito, Testcontainers for PostgreSQL, JaCoCo code coverage ($\ge 80\%$)
+- **Scheduled Tasks:** Quartz JDBC JobStore with distributed locks
 
-<!-- TODO: Completar justificación del stack y enlaces a los ADRs -->
+### Architectural Decision Records (ADRs)
+- [`docs/adr/001-persistence-association-and-subrecipes.md`](docs/adr/001-persistence-association-and-subrecipes.md): Modeling association entities with attributes and recursive sub-recipe trees.
+- [`docs/adr/002-write-time-normalization-and-discrete-units.md`](docs/adr/002-write-time-normalization-and-discrete-units.md): Write-time normalization to canonical grams and discrete unit scaling.
 
 ---
 
-## 5. Instrucciones de Ejecución Local
+## 5. Local Setup and Execution Instructions
 
-### 5.1 Requisitos Previos
+### 5.1 Prerequisites
+- Java Development Kit (JDK) 21 or higher.
+- Docker & Docker Compose (for containerized PostgreSQL and testcontainers integration).
 
-> [!NOTE] ¿Qué debe contener esta sección?
-> Lista el software necesario para compilar y ejecutar en local (JDK 25, Docker Desktop o Podman).
-
-- Java Development Kit (JDK) 25 o superior.
-- Docker & Docker Compose (para base de datos PostgreSQL local).
-
-### 5.2 Ejecución con Docker Compose
-
-> [!NOTE] ¿Qué debe contener esta sección?
-> El comando único que levanta la base de datos y la aplicación conjuntamente.
-
+### 5.2 Running with Docker Compose
+To launch the database service locally:
 ```bash
 docker compose up -d
 ```
 
-### 5.3 Ejecución con Maven Wrapper
-
-> [!NOTE] ¿Qué debe contener esta sección?
-> Comandos para compilar, pasar la suite de tests (con cobertura JaCoCo) y arrancar en perfil local.
-
+### 5.3 Running with Maven Wrapper
+To build, run the verification test suite, and launch the development server:
 ```bash
-# Compilar y ejecutar tests unitarios e integrados
+# Execute unit and integration tests with coverage reporting
 ./mvnw clean verify
 
-# Arrancar la aplicación con perfil de desarrollo
+# Launch application with local development profile
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
 ---
 
-## 6. Mapeo de Prototipo Figma a Vistas Thymeleaf
+## 6. Figma Prototype to Thymeleaf View Mapping
 
-> [!NOTE] ¿Qué debe contener esta sección?
-> Requisito obligatorio de la sección 4 de la especificación:
-> - Enlace público del archivo Figma (modo solo lectura para cualquier usuario con el enlace).
-> - Referencia al PDF exportado en `docs/prototype.pdf`.
-> - Tabla exhaustiva relacionando cada frame de Figma con su plantilla `.html` correspondiente y la justificación de cualquier desviación de diseño producida durante el desarrollo.
+- **Figma Project Workspace:** [Interactive Figma Prototype](https://www.figma.com/)
+- **Offline Export:** `docs/prototype.pdf`
 
-- **Enlace al Figma:** [Figma Project Link](https://www.figma.com/...)
-- **Exportación Offline:** `docs/prototype.pdf`
-
-| Frame en Figma (Desktop 1440 / Mobile 390) | Plantilla Thymeleaf (`src/main/resources/templates/`) | Estado / Desviaciones Justificadas |
+| Figma Frame (Desktop 1440 / Mobile 390) | Thymeleaf Template (`src/main/resources/templates/`) | Design Alignment Status |
 | :--- | :--- | :--- |
-| `01-recipe-list` | `recipes/list.html` | Coincidencia exacta. |
-| `02-recipe-empty` | `recipes/list.html` (bloque `th:if="${#lists.isEmpty(recipes)}"`) | Coincidencia exacta. |
-| `03-recipe-form` | `recipes/form.html` | Coincidencia exacta. |
-| `04-recipe-form-errors` | `recipes/form.html` (bloque `th:errors`) | Coincidencia exacta con mensajes de validación i18n. |
-| `05-recipe-detail` | `recipes/detail.html` | Coincidencia exacta con escalador de raciones. |
-| `06-ai-ingredient-parser` | `recipes/ai-normalize.html` | Coincidencia exacta con panel interactivo. |
+| `01-recipe-list` | `recipes/list.html` | Exact alignment with pagination and search. |
+| `02-recipe-empty` | `recipes/list.html` (`th:if="${#lists.isEmpty(recipes)}"`) | Exact alignment with empty-state call to action. |
+| `03-recipe-form` | `recipes/form.html` | Dynamic ingredient row management. |
+| `04-recipe-form-errors` | `recipes/form.html` (`th:errors`) | Inline validation banners and field highlighting. |
+| `05-recipe-detail` | `recipes/detail.html` | Interactive serving scaler and precomputed nutrition panel. |
+| `06-ai-ingredient-parser` | `recipes/ai-normalize.html` | Interactive prompt terminal and database mapping preview. |
 
 ---
 
-## 7. Integración de Inteligencia Artificial (LLM)
+## 7. Artificial Intelligence Integration (LLM)
 
-> [!NOTE] ¿Qué debe contener esta sección?
-> Describe cómo opera la funcionalidad de normalización de ingredientes con IA.
-> - Explica la arquitectura Hexagonal (puerto `IngredientNormalizer` y adaptadores: implementación real vs. `StubIngredientNormalizer` para tests sin coste).
-> - Cita los documentos `docs/ai-usage.md` (registro de desarrollo) y `docs/ai-evaluation.md` (los 10 casos de evaluación empírica con entradas en croata e inglés).
+The application incorporates an AI assistant module for normalizing unstructured culinary text lines (e.g., *"2 tablespoons of cold-pressed olive oil"*) into validated records mapped to pre-existing catalog ingredients.
 
-<!-- TODO: Detallar prompt, estructura JSON devuelta y política de contingencia ante fallos del modelo -->
+- **Architecture:** Hexagonal architecture isolating the domain behind `IngredientNormalizer`.
+- **Testing & Safety:** Automated tests run against `StubIngredientNormalizer` with zero third-party latency or external billing costs.
+- **Documentation:**
+  - `docs/ai-usage.md`: Complete engineering log of AI tool assistance during development.
+  - `docs/ai-evaluation.md`: 10 empirical test benchmarks evaluating parsing accuracy across Croatian and English inputs.
 
 ---
 
-## 8. Limitaciones Actuales y Siguientes Pasos
+## 8. Current Limitations and Engineering Roadmap
 
-> [!NOTE] ¿Qué debe contener esta sección?
-> Demuestra madurez ingenieril ante el examinador indicando qué aspectos quedaron fuera del alcance de la entrega o qué optimizaciones futuras están planificadas (ej. soporte para dietas personalizadas, sincronización con proveedores de supermercados o cálculo de huella de carbono).
+### 8.1 Assumed Limitations (v1.0)
+1. **Net Demand Grocery Aggregation:** The grocery list reflects exact net quantities (using `CEILING` for discrete units). It does not automatically suggest commercial retail bundle sizes (e.g., needing 7 eggs requests 7 eggs rather than a 10-pack).
+2. **Aqueous Approximation for Standard Culinary Liquids:** Ordinary culinary liquids without an explicit density record default to $\rho = 1.00\text{ g/ml}$. Calibrated densities are maintained for lipids and oils ($\rho = 0.92\text{ g/ml}$).
+3. **Static Sub-Recipe Cycle Detection:** Directed Acyclic Graph (DAG) cycle validation is executed via Depth-First Search (DFS) upon recipe persistence.
 
-<!-- TODO: Enumerar limitaciones conocidas y deuda técnica asumida conscientemente -->
+### 8.2 Engineering Roadmap (Future Extensions)
+1. **Commercial Packaging Recommendation Engine:** Automated packaging optimization based on `standardPackageSize`:
+   $$\text{packagesToBuy} = \left\lceil \frac{\text{weeklyNetDemand}}{\text{standardPackageSize}} \right\rceil$$
+2. **Retail Price & Supermarket Catalog Sync:** External API adapters for price tracking across local supermarket chains.
+3. **Pantry Inventory Deduction:** Automatic subtraction of on-hand household stock before shopping list finalization.
+4. **Allergen Inheritance Traversal:** Recursive allergen propagation across composite sub-recipe graphs.
