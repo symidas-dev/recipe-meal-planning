@@ -21,7 +21,9 @@
    - [Running with Maven Wrapper](#53-running-with-maven-wrapper)
 6. [Figma Prototype to Thymeleaf View Mapping](#6-figma-prototype-to-thymeleaf-view-mapping)
 7. [Artificial Intelligence Integration (LLM)](#7-artificial-intelligence-integration-llm)
-8. [Current Limitations and Engineering Roadmap](#8-current-limitations-and-engineering-roadmap)
+8. [Current Limitations and Out-of-Scope Problems](#8-current-limitations-and-out-of-scope-problems)
+   - [8.1 Out-of-Scope Problems and Comprehensive Enhancements (GitHub Issues)](#81-out-of-scope-problems-and-comprehensive-enhancements-github-issues)
+   - [8.2 Assumed Domain Approximations (v1.0 Core)](#82-assumed-domain-approximations-v10-core)
 
 ---
 
@@ -133,16 +135,36 @@ The application incorporates an AI assistant module for normalizing unstructured
 
 ---
 
-## 8. Current Limitations and Engineering Roadmap
+## 8. Current Limitations and Out-of-Scope Problems
 
-### 8.1 Assumed Limitations (v1.0)
-1. **Net Demand Grocery Aggregation:** The grocery list reflects exact net quantities (using `CEILING` for discrete units). It does not automatically suggest commercial retail bundle sizes (e.g., needing 7 eggs requests 7 eggs rather than a 10-pack).
-2. **Aqueous Approximation for Standard Culinary Liquids:** Ordinary culinary liquids without an explicit density record default to $\rho = 1.00\text{ g/ml}$. Calibrated densities are maintained for lipids and oils ($\rho = 0.92\text{ g/ml}$).
-3. **Static Sub-Recipe Cycle Detection:** Directed Acyclic Graph (DAG) cycle validation is executed via Depth-First Search (DFS) upon recipe persistence.
+To prevent scope creep and maintain strict alignment with the course evaluation rubric (Learning Outcomes LO1–LO7), several comprehensive real-world problems were deliberately analyzed, decoupled from the v1.0 core, and cataloged into **GitHub Issues** as future enhancements.
 
-### 8.2 Engineering Roadmap (Future Extensions)
-1. **Commercial Packaging Recommendation Engine:** Automated packaging optimization based on `standardPackageSize`:
-   $$\text{packagesToBuy} = \left\lceil \frac{\text{weeklyNetDemand}}{\text{standardPackageSize}} \right\rceil$$
-2. **Retail Price & Supermarket Catalog Sync:** External API adapters for price tracking across local supermarket chains.
-3. **Pantry Inventory Deduction:** Automatic subtraction of on-hand household stock before shopping list finalization.
-4. **Allergen Inheritance Traversal:** Recursive allergen propagation across composite sub-recipe graphs.
+### 8.1 Out-of-Scope Problems and Comprehensive Enhancements (GitHub Issues)
+
+1. **Domestic Pantry Tracking & Net Grocery Demand (Issue #1):**
+   - *Problem:* A standard shopping list assumes zero items exist at home. If 400g of tomato sauce or 6 eggs are already in the pantry, the user still buys the full weekly amount.
+   - *Enhancement:* A `PantryItem` aggregate that subtracts on-hand household inventory:
+     $$\text{netShoppingDemand} = \max\Big(0, \; \text{weeklyGrossDemand} - \text{pantryStock}\Big)$$
+   - *Status:* Logged as secondary backlog enhancement (`Issue 01 - Domestic Pantry Inventory`).
+
+2. **Retail Commercial Packaging Optimization & Surplus (Issue #2):**
+   - *Problem:* Supermarkets sell goods in discrete commercial bundles (e.g., cartons of 6 or 12 eggs, 1 kg flour bags). Needing 7 eggs requires buying 2 cartons of 6 (12 eggs), leaving a surplus.
+   - *Enhancement:* A commercial packaging optimizer using `standardPackageSize`:
+     $$\text{packagesToBuy} = \left\lceil \frac{\text{weeklyNetDemand}}{\text{standardPackageSize}} \right\rceil$$
+     crediting the residual surplus into future weeks.
+   - *Status:* Logged as secondary backlog enhancement (`Issue 02 - Retail Package Optimization`).
+
+3. **Time vs. Cost Trade-offs: Homemade vs. Store-Bought (Issue #3):**
+   - *Problem:* Users often deliberate whether making tomato sauce from scratch (fresh tomatoes, onion, oil — 45 min) is worth the time savings compared to opening a commercial canned jar (2 min).
+   - *Enhancement:* Estimated cost calculator based on raw ingredient retail prices, displaying a comparison card (*Homemade vs Store-bought*).
+   - *Status:* Logged as secondary backlog enhancement (`Issue 03 - Cost Estimation and Homemade Comparison`).
+
+4. **Recursive Allergen and Dietary Restriction Traversal (Issue #4):**
+   - *Problem:* Tracking inherited trace allergens (gluten, lactose, nuts) across deeply nested composite sub-recipes.
+   - *Enhancement:* Recursive propagation engine marking parent recipes based on leaf ingredients.
+   - *Status:* Logged as secondary backlog enhancement (`Issue 04 - Allergen Inheritance Engine`).
+
+### 8.2 Assumed Domain Approximations (v1.0 Core)
+
+1. **Aqueous Approximation for Standard Culinary Liquids:** Ordinary culinary liquids without an explicit density record in the database default to $\rho = 1.00\text{ g/ml}$. Calibrated densities are maintained specifically for lipids and culinary oils ($\rho = 0.92\text{ g/ml}$).
+2. **Sub-Recipe Cycle Protection:** Directed Acyclic Graph (DAG) cycle validation via Depth-First Search (DFS) runs during recipe persistence, rejecting recursive self-references with HTTP 422.

@@ -5,11 +5,11 @@
 > **Institution:** Algebra Bernays University — Academic Year 2026/27  
 > **Student:** Javier Liaño Rioz  
 
-This document establishes the **Ubiquitous Language** of the project. All Java class names, attributes, database schemas, service methods, REST endpoints, and architectural documentation adhere strictly to these definitions.
+This document establishes the **Ubiquitous Language** of the project, using real-world culinary metaphors. All Java class names, attributes, database schemas, service methods, REST endpoints, and architectural documentation adhere strictly to these definitions.
 
 ---
 
-## 1. Culinary & Recipe Entities
+## 1. Culinary & Recipe Entities (The Kitchen Domain)
 
 ### `RawIngredient`
 * **Definition:** An indivisible, primary grocery item available in retail markets. Represents the terminal leaf in the recipe ingredient tree.
@@ -19,7 +19,7 @@ This document establishes the **Ubiquitous Language** of the project. All Java c
 ### `Recipe`
 * **Definition:** A complete culinary specification for preparing a single dish or intermediate component.
 * **Real-World Analogy:** A recipe sheet or cookbook entry.
-* **System Responsibility:** Fundamental unit of culinary knowledge. Encapsulates title, active preparation time, passive cooking time, step-by-step instructions, reference servings, and its list of `RecipeIngredient` items. Can be served as a final dish or reused recursively as a sub-recipe.
+* **System Responsibility:** Fundamental unit of culinary knowledge. Encapsulates title, active preparation time, passive cooking time, step-by-step instructions, reference servings ($P_{ref}$), and its list of `RecipeIngredient` items. Can be served as a final dish or reused recursively as a sub-recipe.
 
 ### `SubRecipe`
 * **Definition:** An intermediate culinary preparation that, while being a standalone recipe, is incorporated as an ingredient into a higher-level recipe.
@@ -37,27 +37,17 @@ This document establishes the **Ubiquitous Language** of the project. All Java c
 
 ---
 
-## 2. Menu & Temporal Planning Entities
+## 2. Weekly Meal Planning Entities (The Fridge Whiteboard Domain)
 
-### `Menu`
-* **Definition:** A coordinated gastronomic offering grouping one or more dishes served together in a single dining session.
-* **Real-World Analogy:** A multi-course meal: *"Mixed salad (starter), baked salmon (main), and fruit salad (dessert)"*.
-* **System Responsibility:** Autonomous aggregate decoupled from the calendar. Can be authored, persisted in a personal library, and scheduled across multiple weeks without data duplication.
+### `WeeklyMenu`
+* **Definition:** The 7-day calendar whiteboard where a household plans food consumption from Monday to Sunday.
+* **Real-World Analogy:** The magnetic weekly planner stuck to the kitchen refrigerator.
+* **System Responsibility:** Root aggregate for meal planning. Tracks the start date (`weekStartDate`) and contains `MealSlot` items. Coordinates weekly nutritional accumulation and consolidated grocery lists.
 
-### `MenuCourse`
-* **Definition:** An individual course or component within a `Menu`.
-* **Real-World Analogy:** Each individual plate served at the table.
-* **System Responsibility:** Couples a `Menu` with a specific `Recipe` and defines course-specific `servings`, accommodating guests who skip courses or share portions.
-
-### `WeeklyPlan`
-* **Definition:** A 7-day calendar window wherein an individual or household schedules meal consumption.
-* **Real-World Analogy:** A weekly meal calendar (Monday through Sunday).
-* **System Responsibility:** Root aggregate for meal planning. Contains `CalendarEntry` slots and generates aggregated nutritional reports and consolidated shopping lists.
-
-### `CalendarEntry`
-* **Definition:** A specific schedule slot binding a `WeeklyPlan` with a `Menu` at a specific day and meal time.
-* **Real-World Analogy:** *"Wednesday at lunch, serve Menu #3"*.
-* **System Responsibility:** Solves temporal allocation. Couples `DayOfWeek` (MONDAY..SUNDAY) and `MealTime` (BREAKFAST, MID_MORNING_SNACK, LUNCH, AFTERNOON_SNACK, DINNER) with a `Menu`.
+### `MealSlot`
+* **Definition:** An individual meal slot within a specific day and time on the weekly board.
+* **Real-World Analogy:** The whiteboard box for *"Wednesday Lunch"* where you write what you are eating and for how many people.
+* **System Responsibility:** Couples a `WeeklyMenu` with a specific `Recipe`, specifying the `DayOfWeek` (MONDAY..SUNDAY), the `MealTime` (BREAKFAST..DINNER), and the real target headcount (`servings`).
 
 ---
 
