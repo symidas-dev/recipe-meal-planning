@@ -54,14 +54,14 @@ public record MeasuredQuantity(
     }
 
     public MeasuredQuantity toGrams(Density density) {
-        Objects.requireNonNull(density, "Density cannot be null.");
-
         if (this.unit.getMagnitudeType() != MeasurementUnit.MagnitudeType.VOLUME) {
             throw new IllegalArgumentException("Unit must be of type VOLUME to convert to grams with density.");
         }
 
+        Density effectiveDensity = Objects.requireNonNullElse(density, Density.DEFAULT_CULINARY_WATER_EQUIVALENT);
+
         BigDecimal milliliters = this.unit.toBaseUnit(this.amount);
-        BigDecimal gramsFromDensity = milliliters.multiply(density.value());
+        BigDecimal gramsFromDensity = milliliters.multiply(effectiveDensity.value());
         BigDecimal roundedGrams = gramsFromDensity.setScale(DECIMAL_SCALE, ROUNDING);
 
         return new MeasuredQuantity(roundedGrams, MeasurementUnit.GRAM);
