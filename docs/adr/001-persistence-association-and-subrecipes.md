@@ -44,10 +44,12 @@ From a relational persistence perspective using Spring Data JPA / Hibernate 7, f
 We adopt **Option C**. The entity relationship model is structured as follows:
 
 ```text
-Recipe [1] <---> [0..*] RecipeIngredient [0..1] ---> [1] RawIngredient
+Recipe [1] <---> [0..*] RecipeIngredient [0..1] ---> [1] TheoreticalIngredient
                                          [0..1] ---> [1] Recipe (Sub-Recipe)
 
-WeeklyPlan [1] <---> [0..*] CalendarEntry [0..*] ---> [1] Menu [1] <---> [0..*] MenuCourse [0..*] ---> [1] Recipe
+RawIngredient [0..*] ---> [1] TheoreticalIngredient (Canonical Catalog)
+
+WeeklyMenu [1] <---> [0..*] MealSlot [0..*] ---> [1] Recipe
 ```
 
 ### 3.1. Invariant Rules

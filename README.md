@@ -33,8 +33,9 @@ The **Recipe and Meal Planning** platform is a full-stack, enterprise-grade Java
 
 ### Core Aggregate Structure
 ```text
-Recipe -> RecipeIngredient (amount, unit, canonicalGrams) -> RawIngredient | Recipe (sub-recipe)
-WeeklyPlan -> CalendarEntry (dayOfWeek, mealTime) -> Menu -> MenuCourse (servings) -> Recipe
+Recipe -> RecipeIngredient (amount, unit, canonicalGrams) -> TheoreticalIngredient | Recipe (sub-recipe)
+RawIngredient (pantry batches, purchaseDate, FIFO status) -> TheoreticalIngredient
+WeeklyMenu (weekStartDate, weeklyTotals) -> MealSlot (dayOfWeek, mealTime, servings) -> Recipe
 ```
 
 ### Advanced Specialized Capabilities
