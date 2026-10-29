@@ -4,8 +4,11 @@ import hr.algebra.recipemealplanning.domain.entity.RawIngredient;
 import hr.algebra.recipemealplanning.domain.enums.InventoryStatus;
 
 import java.util.List;
+import org.springframework.stereotype.Service;
+
 import java.util.Objects;
 
+@Service
 public class PantryInventoryService {
 
     public void switchActiveBatch(RawIngredient currentlyActive, RawIngredient batchToActivate) {
