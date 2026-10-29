@@ -165,6 +165,11 @@ To prevent scope creep and maintain strict alignment with the course evaluation 
    - *Enhancement:* Recursive propagation engine marking parent recipes based on leaf ingredients.
    - *Status:* Logged as secondary backlog enhancement (`Issue 04 - Allergen Inheritance Engine`).
 
+
+5. **Social Media Recipe Ingestion & AI Extraction (Issue #11):**
+   - *Problem:* Translating short-form cooking videos (Instagram Reels, TikTok, YouTube) into structured recipes requires tedious manual transcription and metric unit conversion.
+   - *Enhancement:* Multimodal ingestion pipeline combining caption scraping, Whisper speech-to-text, and Spring AI normalization into `RecipeCreateCommand` with 1-click human verification.
+   - *Status:* Logged as secondary backlog enhancement (`Issue 11 - Social Media Recipe Ingestion and AI Extraction Engine`).
 ### 8.2 Assumed Domain Approximations (v1.0 Core)
 
 1. **Aqueous Approximation for Standard Culinary Liquids:** Ordinary culinary liquids without an explicit density record in the database default to $\rho = 1.00\text{ g/ml}$. Calibrated densities are maintained specifically for lipids and culinary oils ($\rho = 0.92\text{ g/ml}$).
