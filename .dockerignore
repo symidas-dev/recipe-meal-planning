@@ -1,0 +1,33 @@
+target/
+*.class
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE & Editor files
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Build and local environment files
+.mvn/wrapper/maven-wrapper.jar
+mvnw.cmd
+*.log
+.DS_Store
+Thumbs.db
+
+# Documentation & drafts
+docs/
+*.md
