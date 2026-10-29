@@ -1,15 +1,24 @@
 package hr.algebra.recipemealplanning.domain.model;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
+@Embeddable
 public record NutritionalInformation(
+        @Column(name = "calories", precision = 8, scale = 2)
         BigDecimal calories,
+
+        @Column(name = "protein", precision = 8, scale = 2)
         BigDecimal protein,
+
+        @Column(name = "carbohydrates", precision = 8, scale = 2)
         BigDecimal carbohydrates,
+
+        @Column(name = "fat", precision = 8, scale = 2)
         BigDecimal fat
 ) {
-
     public static final NutritionalInformation ZERO = new NutritionalInformation(
             BigDecimal.ZERO,
             BigDecimal.ZERO,
