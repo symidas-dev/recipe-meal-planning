@@ -1,5 +1,6 @@
 package hr.algebra.recipemealplanning.domain.entity;
 
+import hr.algebra.recipemealplanning.domain.model.NutritionalComponent;
 import hr.algebra.recipemealplanning.domain.model.NutritionalInformation;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
@@ -19,7 +20,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "theoretical_ingredients")
 @Getter
-public class TheoreticalIngredient {
+public class TheoreticalIngredient implements NutritionalComponent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -71,6 +72,23 @@ public class TheoreticalIngredient {
     public void deactivate() {
         this.isActive = false;
     }
+    @Override
+    public String getDisplayName() {
+        return this.canonicalName;
+    }
+
+    @Override
+    public NutritionalInformation computeNutritionForGrams(BigDecimal grams) {
+        Objects.requireNonNull(grams, "grams must not be null");
+        BigDecimal factor = grams.divide(new BigDecimal("100.00"), 4, java.math.RoundingMode.HALF_UP);
+        return new NutritionalInformation(
+                this.nominalNutritionPer100g.calories().multiply(factor).setScale(2, java.math.RoundingMode.HALF_UP),
+                this.nominalNutritionPer100g.protein().multiply(factor).setScale(2, java.math.RoundingMode.HALF_UP),
+                this.nominalNutritionPer100g.carbohydrates().multiply(factor).setScale(2, java.math.RoundingMode.HALF_UP),
+                this.nominalNutritionPer100g.fat().multiply(factor).setScale(2, java.math.RoundingMode.HALF_UP)
+        );
+    }
+
 
     @Override
     public boolean equals(Object o) {

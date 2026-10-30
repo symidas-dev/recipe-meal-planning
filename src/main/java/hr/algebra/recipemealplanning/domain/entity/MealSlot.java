@@ -100,8 +100,12 @@ public class MealSlot {
         this.actualNutrition = Objects.requireNonNull(nutrition, "nutrition must not be null");
     }
 
-    void setWeeklyMenu(WeeklyMenu weeklyMenu) {
-        this.weeklyMenu = weeklyMenu;
+    void bindToWeeklyMenu(WeeklyMenu weeklyMenu) {
+        this.weeklyMenu = Objects.requireNonNull(weeklyMenu, "weeklyMenu must not be null");
+    }
+
+    void unbindWeeklyMenu() {
+        this.weeklyMenu = null;
     }
 
     @Override

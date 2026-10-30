@@ -1,6 +1,7 @@
 package hr.algebra.recipemealplanning.domain.entity;
 
 import hr.algebra.recipemealplanning.domain.enums.MeasurementUnit;
+import hr.algebra.recipemealplanning.domain.model.NutritionalComponent;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -77,12 +78,20 @@ public class RecipeIngredient {
         return item;
     }
 
-    public boolean isSubRecipe() {
-        return subRecipe != null;
+    public NutritionalComponent getNutritionalComponent() {
+        return subRecipe != null ? subRecipe : theoreticalIngredient;
     }
 
-    void setRecipe(Recipe recipe) {
-        this.recipe = recipe;
+    public String getItemDisplayName() {
+        return getNutritionalComponent().getDisplayName();
+    }
+
+    void bindToRecipe(Recipe recipe) {
+        this.recipe = Objects.requireNonNull(recipe, "recipe must not be null");
+    }
+
+    void unbindRecipe() {
+        this.recipe = null;
     }
 
     @Override

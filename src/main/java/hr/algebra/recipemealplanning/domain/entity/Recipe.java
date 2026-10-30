@@ -1,5 +1,6 @@
 package hr.algebra.recipemealplanning.domain.entity;
 
+import hr.algebra.recipemealplanning.domain.model.NutritionalComponent;
 import hr.algebra.recipemealplanning.domain.model.NutritionalInformation;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
@@ -23,7 +24,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "recipes")
 @Getter
-public class Recipe {
+public class Recipe implements NutritionalComponent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -105,13 +106,13 @@ public class Recipe {
     public void addIngredient(RecipeIngredient ingredient) {
         Objects.requireNonNull(ingredient, "ingredient must not be null");
         ingredients.add(ingredient);
-        ingredient.setRecipe(this);
+        ingredient.bindToRecipe(this);
     }
 
     public void removeIngredient(RecipeIngredient ingredient) {
         Objects.requireNonNull(ingredient, "ingredient must not be null");
         ingredients.remove(ingredient);
-        ingredient.setRecipe(null);
+        ingredient.unbindRecipe();
     }
 
     public void updateNominalNutrition(NutritionalInformation nutrition) {
@@ -125,6 +126,33 @@ public class Recipe {
     public List<RecipeIngredient> getIngredients() {
         return Collections.unmodifiableList(ingredients);
     }
+    public List<Recipe> getNestedRecipes() {
+        List<Recipe> nested = new ArrayList<>();
+        for (RecipeIngredient line : this.ingredients) {
+            if (line.getSubRecipe() != null) {
+                nested.add(line.getSubRecipe());
+            }
+        }
+        return Collections.unmodifiableList(nested);
+    }
+
+    @Override
+    public String getDisplayName() {
+        return this.title;
+    }
+
+    @Override
+    public NutritionalInformation computeNutritionForGrams(java.math.BigDecimal grams) {
+        Objects.requireNonNull(grams, "grams must not be null");
+        java.math.BigDecimal factor = grams.divide(new java.math.BigDecimal("100.00"), 4, java.math.RoundingMode.HALF_UP);
+        return new NutritionalInformation(
+                this.nominalNutrition.calories().multiply(factor).setScale(2, java.math.RoundingMode.HALF_UP),
+                this.nominalNutrition.protein().multiply(factor).setScale(2, java.math.RoundingMode.HALF_UP),
+                this.nominalNutrition.carbohydrates().multiply(factor).setScale(2, java.math.RoundingMode.HALF_UP),
+                this.nominalNutrition.fat().multiply(factor).setScale(2, java.math.RoundingMode.HALF_UP)
+        );
+    }
+
 
     @Override
     public boolean equals(Object o) {
