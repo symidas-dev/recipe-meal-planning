@@ -1,6 +1,8 @@
 package hr.algebra.recipemealplanning.domain.entity;
 
 import hr.algebra.recipemealplanning.domain.model.NutritionalInformation;
+import hr.algebra.recipemealplanning.domain.enums.DayOfWeek;
+import hr.algebra.recipemealplanning.domain.enums.MealTime;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.CascadeType;
@@ -81,14 +83,35 @@ public class WeeklyMenu {
     public void addSlot(MealSlot slot) {
         Objects.requireNonNull(slot, "slot must not be null");
         slots.add(slot);
-        slot.setWeeklyMenu(this);
+        slot.bindToWeeklyMenu(this);
     }
 
     public void removeSlot(MealSlot slot) {
         Objects.requireNonNull(slot, "slot must not be null");
         slots.remove(slot);
-        slot.setWeeklyMenu(null);
+        slot.unbindWeeklyMenu();
     }
+    public void removeSlotMatching(DayOfWeek dayOfWeek, MealTime mealTime) {
+        slots.removeIf(slot -> {
+            boolean matches = slot.getDayOfWeek() == dayOfWeek && slot.getMealTime() == mealTime;
+            if (matches) {
+                slot.unbindWeeklyMenu();
+            }
+            return matches;
+        });
+    }
+    public void assignOrUpdateSlot(Recipe recipe, DayOfWeek dayOfWeek, MealTime mealTime, int servings) {
+        for (MealSlot existingSlot : slots) {
+            if (existingSlot.getDayOfWeek() == dayOfWeek && existingSlot.getMealTime() == mealTime) {
+                existingSlot.reassignRecipe(recipe);
+                existingSlot.adjustServings(servings);
+                return;
+            }
+        }
+        addSlot(new MealSlot(recipe, dayOfWeek, mealTime, servings));
+    }
+
+
 
     public void updateWeeklyTotals(NutritionalInformation nominal, NutritionalInformation actual) {
         this.totalWeekNutritionNominal = Objects.requireNonNull(nominal, "nominal nutrition must not be null");
